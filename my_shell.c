@@ -25,6 +25,8 @@ bool isBackgroundProcess(char ** args);
 int redirectIO(char ** args);
 
 main() {
+	int parentPID;
+	int status;
 	int i;
 	char **args; 
 	
@@ -44,7 +46,7 @@ main() {
 					executeCommand(args);
 				}else if(!isBackgroundProcess(args)){
 					executeCommand(args);
-					//wait for child process.
+					parentPID = wait(&status);
 				}
 			}
 		}
