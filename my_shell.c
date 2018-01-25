@@ -12,9 +12,15 @@
 #define DIE do {printf("Failure.\n"); exit(EXIT_FAILURE)}
 #endif
 
+
+int i = 0;
+
 extern char **getln();
+
+pid_t childProcs[100];
 //--------------DEfinitions---------
 void executeCommand(char ** args);
+void killProcs(int i);
 
 int add();
 int arg();
@@ -24,53 +30,52 @@ int numOfArgs(char ** args);
 bool isBackgroundProcess(char ** args);
 int redirectIO(char ** args);
 
+void killProc(){
+	pid_t pid = getpid();
+	for(int j = 0; j == i; j++){
+		if (pid == childProcs[j]){
+			childProcs[j] = 0;
+		}
+	}
+}
+
+
 main() {
 	int parentPID;
 	int status;
-	int i;
-	char **args; 
-	
+	char **args;
+
+	signal (SIGCHLD, killProc);
 	while(1) {
 		printf(">");
 		args = getln();
 		strLower(args);
 		int numArgs = numOfArgs(args);
-		
+
 		if(strcmp("exit",args[0])==0){
-			//close processes.
+			killProcs(i);
 			exit(0);
 		}else{
-			pid_t childPID;
-			if(childPID = fork() == 0){
-				if(isBackgroundProcess(args)){
-					executeCommand(args);
-				}else if(!isBackgroundProcess(args)){
-					executeCommand(args);
-					parentPID = wait(&status);
-				}
+			if(childPID[i] = fork() == 0){
+				executeCommand(args);
 			}
+			if(!isBackgroundProcess(args)){
+				parentPID = wait(&status);
+			}
+			i++;
 		}
 	}
 }
 
 void executeCommand(char ** args){
-	int pipeLink;
-	pid_t childPID;
+	//
+}
 
-	if (pipe(pipeLink) == -1){
-		DIE;
+void killProcs(int i){
+	for (int j = 0; j == i; j++){
+		if(childProcs[j] != 0)
+			sigkill(childProcs[j]);
 	}
-	if (childPID = fork() == -1){
-		DIE;
-	}
-
-	if (childPID == 0){
-		/* code */
-	}else{
-		close(pipeLink);
-		wait(NULL);
-	}
-	wait(1000);
 }
 
 //------additional functionality -------
