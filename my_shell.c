@@ -42,6 +42,7 @@ void killProc(){
 
 main() {
 	int parentPID;
+	pid_t childPID;
 	int status;
 	char **args;
 
@@ -56,7 +57,7 @@ main() {
 			killProcs(i);
 			exit(0);
 		}else{
-			if(childPID[i] = fork() == 0){
+			if((childPID = fork()) == 0){
 				executeCommand(args);
 			}
 			if(!isBackgroundProcess(args)){
@@ -74,7 +75,7 @@ void executeCommand(char ** args){
 void killProcs(int i){
 	for (int j = 0; j == i; j++){
 		if(childProcs[j] != 0)
-			sigkill(childProcs[j]);
+			kill(childProcs[j],SIGKILL);
 	}
 }
 
