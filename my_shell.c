@@ -13,80 +13,97 @@
 #endif
 
 
-int i = 0;
-
 extern char **getln();
 
-pid_t childProcs[100];
-//--------------DEfinitions---------
+//--------------Definitions---------
 void executeCommand(char ** args);
-void killProcs(int i);
 
-int add();
-int arg();
+int add(char ** args);
+int sub(char ** args);
+void arg(char ** args);
 
 void strLower(char ** args);
 int numOfArgs(char ** args);
 bool isBackgroundProcess(char ** args);
-int redirectIO(char ** args);
-
-void killProc(){
-	pid_t pid = getpid();
-	for(int j = 0; j == i; j++){
-		if (pid == childProcs[j]){
-			childProcs[j] = 0;
-		}
-	}
-}
+bool redirectIO(char ** args);
 
 
 main() {
-	int parentPID;
-	pid_t childPID;
+	pid_t parentPID;
 	int status;
 	char **args;
 
-	signal (SIGCHLD, killProc);
+	signal (SIGCHLD, NULL);
 	while(1) {
 		printf(">");
 		args = getln();
+		if(args[0] == NULL){
+			printf("Shell: Invalide Argument.\n");
+			continue;
+		}
 		strLower(args);
 		int numArgs = numOfArgs(args);
 
 		if(strcmp("exit",args[0])==0){
-			killProcs(i);
+			//killProcs(i);
 			exit(0);
+		}else if (strcmp("add",args[0])==0) {
+			int result = add(args);
+		}else if (strcmp("sub",args[0])==0) {
+			int result = sub(args);
+		}else if (strcmp("arg",args[0])==0) {
+			arg(args);
 		}else{
-			if((childPID = fork()) == 0){
-				executeCommand(args);
-			}
 			if(!isBackgroundProcess(args)){
+				executeCommand(args);
+			}else if(isBackgroundProcess(args)){
+				executeCommand(args);
 				parentPID = wait(&status);
 			}
-			i++;
 		}
 	}
+	exit(1);
 }
 
 void executeCommand(char ** args){
+	pid_t ID;
+
+	int j = 0;
+	int i = 0;
+	char ** arguments = malloc(sizeof(char*)*100);
+	arguments[j] = args[i];
+	arguments[j + 1] = args[i + 1];
+	arguments[j + 2] = NULL;
+
+	ID = fork();
+	if (ID == -1) {
+		printf("SHELL: Error executing command.\n");
+		exit(1);
+	}else if (ID > 0) {
+		wait(NULL);
+	}else if (ID == 0) {
+		if (redirectIO(args)) {
+			char * inputFile = NULL;
+			char * outputFile = NULL;
+			
+			/* code */
+			// call freopn then call exec.
+		}else{
+			execvp(arguments[j],arguments);
+		}
+	}
+	free(arguments);
+}
+//------additional functionality -------
+int add(char ** args){
+	return 0;
+}
+int sub(char ** args){
+	return 0;
+}
+void arg(char ** args){
 	//
 }
-
-void killProcs(int i){
-	for (int j = 0; j == i; j++){
-		if(childProcs[j] != 0)
-			kill(childProcs[j],SIGKILL);
-	}
-}
-
-//------additional functionality -------
-int add(){
-	return 0;
-}
-int arg(){
-	return 0;
-}
-// Make your won.
 //------Utility functions---------------
 void strLower(char ** args){
 	for(int i = 0; args[i] != NULL; i++) {
@@ -108,20 +125,19 @@ int numOfArgs(char ** args){
 bool isBackgroundProcess(char ** args){
 	for(int i = 0; args[i] != NULL; i++){
   		if(strcmp("&",args[i]) == 0){
+			args[i] = NULL;
   			return true;
   		}
 	}
 	return false;
 }
 
-int redirectIO(char ** args){
+bool redirectIO(char ** args){
 	for(int i = 0; args[i] != NULL; i++){
-  		if(strcmp(">",args[i]) == 0){
-  			return 1;
-  		}else if(strcmp("<",args[i]) == 0){
-  			return -1;
+  		if((strcmp(">",args[i]) == 0) || (strcmp("<",args[i]) == 0)){
+  			return true;
   		}else{
-  			return 0;
+  			return false;
   		}
 	}
 }
