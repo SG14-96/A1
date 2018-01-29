@@ -15,8 +15,14 @@
 
 extern char **getln();
 
+<<<<<<< HEAD
 //--------------Definitions---------
+=======
+pid_t childProcs[100];
+//--------------DEfinitions---------
+>>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 void executeCommand(char ** args);
+void killProcs(int i);
 
 int add(char ** args);
 int sub(char ** args);
@@ -28,12 +34,29 @@ bool isBackgroundProcess(char ** args);
 bool redirectIO(char ** args);
 
 
+void killProc(){
+	pid_t pid = getpid();
+	for(int j = 0; j == i; j++){
+		if (pid == childProcs[j]){
+			childProcs[j] = NULL;
+		}
+	}
+}
+
+int i = 0;
+
 main() {
 	pid_t parentPID;
 	int status;
+<<<<<<< HEAD
 	char **args;
 
 	signal (SIGCHLD, NULL);
+=======
+	char **args; 
+	
+	signal (SIGCHLD, killProc);
+>>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 	while(1) {
 		printf(">");
 		args = getln();
@@ -45,7 +68,11 @@ main() {
 		int numArgs = numOfArgs(args);
 
 		if(strcmp("exit",args[0])==0){
+<<<<<<< HEAD
 			//killProcs(i);
+=======
+			killProcs(i);
+>>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 			exit(0);
 		}else if (strcmp("add",args[0])==0) {
 			int result = add(args);
@@ -54,18 +81,28 @@ main() {
 		}else if (strcmp("arg",args[0])==0) {
 			arg(args);
 		}else{
+<<<<<<< HEAD
 			if(!isBackgroundProcess(args)){
 				executeCommand(args);
 			}else if(isBackgroundProcess(args)){
 				executeCommand(args);
 				parentPID = wait(&status);
+=======
+			if(childPID[i] = fork() == 0){
+				executeCommand(args);
+>>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 			}
+			if(!isBackgroundProcess(args)){
+				parentPID = wait(&status);
+			}
+			i++;
 		}
 	}
 	exit(1);
 }
 
 void executeCommand(char ** args){
+<<<<<<< HEAD
 	pid_t ID;
 
 	int j = 0;
@@ -93,6 +130,15 @@ void executeCommand(char ** args){
 		}
 	}
 	free(arguments);
+=======
+	//
+}
+
+void killProcs(int i){
+	for (int j = 0; j == i; j++){
+		sigkill(childProcs[j]);
+	}
+>>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 }
 //------additional functionality -------
 int add(char ** args){
