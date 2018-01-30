@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #ifndef DIE
 #define DIE do {printf("Failure.\n"); exit(EXIT_FAILURE)}
@@ -15,48 +16,25 @@
 
 extern char **getln();
 
-<<<<<<< HEAD
 //--------------Definitions---------
-=======
-pid_t childProcs[100];
-//--------------DEfinitions---------
->>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 void executeCommand(char ** args);
-void killProcs(int i);
 
-int add(char ** args);
-int sub(char ** args);
+void add(char ** args);
+void sub(char ** args);
 void arg(char ** args);
 
+char ** getArgs(char ** args, char * inputFile, char * outputFile);
 void strLower(char ** args);
 int numOfArgs(char ** args);
 bool isBackgroundProcess(char ** args);
 bool redirectIO(char ** args);
 
-
-void killProc(){
-	pid_t pid = getpid();
-	for(int j = 0; j == i; j++){
-		if (pid == childProcs[j]){
-			childProcs[j] = NULL;
-		}
-	}
-}
-
 int i = 0;
 
 main() {
-	pid_t parentPID;
-	int status;
-<<<<<<< HEAD
 	char **args;
 
 	signal (SIGCHLD, NULL);
-=======
-	char **args; 
-	
-	signal (SIGCHLD, killProc);
->>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 	while(1) {
 		printf(">");
 		args = getln();
@@ -65,52 +43,35 @@ main() {
 			continue;
 		}
 		strLower(args);
-		int numArgs = numOfArgs(args);
 
 		if(strcmp("exit",args[0])==0){
-<<<<<<< HEAD
-			//killProcs(i);
-=======
-			killProcs(i);
->>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
 			exit(0);
 		}else if (strcmp("add",args[0])==0) {
-			int result = add(args);
+			add(args);
 		}else if (strcmp("sub",args[0])==0) {
-			int result = sub(args);
+			sub(args);
 		}else if (strcmp("arg",args[0])==0) {
 			arg(args);
 		}else{
-<<<<<<< HEAD
-			if(!isBackgroundProcess(args)){
+			if(isBackgroundProcess(args)){
 				executeCommand(args);
-			}else if(isBackgroundProcess(args)){
+			}else if(!isBackgroundProcess(args)){
 				executeCommand(args);
-				parentPID = wait(&status);
-=======
-			if(childPID[i] = fork() == 0){
-				executeCommand(args);
->>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
+				signal(SIGCHLD,SIG_IGN);
 			}
-			if(!isBackgroundProcess(args)){
-				parentPID = wait(&status);
-			}
-			i++;
 		}
 	}
 	exit(1);
 }
 
 void executeCommand(char ** args){
-<<<<<<< HEAD
-	pid_t ID;
+	char * inputFile = malloc(sizeof(char)*100);
+	char * outputFile = malloc(sizeof(char)*100);
 
-	int j = 0;
-	int i = 0;
-	char ** arguments = malloc(sizeof(char*)*100);
-	arguments[j] = args[i];
-	arguments[j + 1] = args[i + 1];
-	arguments[j + 2] = NULL;
+	char ** argums = getArgs(args,inputFile,outputFile);
+
+	pid_t ID;
+	int pipefd[2];
 
 	ID = fork();
 	if (ID == -1) {
@@ -120,37 +81,96 @@ void executeCommand(char ** args){
 		wait(NULL);
 	}else if (ID == 0) {
 		if (redirectIO(args)) {
-			char * inputFile = NULL;
-			char * outputFile = NULL;
-			
-			/* code */
-			// call freopn then call exec.
+			if(inputFile != NULL){
+				int fd = open(inputFile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+			    dup2(fd, 1);
+			    dup2(fd, 2);
+			    close(fd);
+			}else if(outputFile != NULL){
+				pipe(pipefd);
+				close(pipefd[0]);
+			    dup2(pipefd[1], 1);
+			    dup2(pipefd[1], 2);
+			    close(pipefd[1]);
+			}
+			execvp(args[0],argums);
 		}else{
-			execvp(arguments[j],arguments);
+			execvp(args[0],argums);
 		}
+	}else{
+		char buffer[1024];
+	    close(pipefd[1]);
+	    while (read(pipefd[0], buffer, sizeof(buffer)) != 0){
+	    }
 	}
-	free(arguments);
-=======
-	//
-}
 
-void killProcs(int i){
-	for (int j = 0; j == i; j++){
-		sigkill(childProcs[j]);
+	if (argums != NULL) {
+		free(argums);
 	}
->>>>>>> bf166b4f08884fd2af2ab202754e5fe62e516c2f
+	if(inputFile != NULL){
+		free(inputFile);
+	}
+	if (outputFile != NULL) {
+		free(inputFile);
+	}
 }
 //------additional functionality -------
-int add(char ** args){
-	return 0;
+void add(char ** args){
+	int num;
+	int convertNum;
+	char * string = malloc(sizeof(char) * 100);
+
+	for (int i = 1; args[i]!= NULL; i++){
+		string = args[i];
+		convertNum = strtol(string, NULL, 0);
+		num = convertNum + num;
+	}
+
+	printf("The answer is %d\n",num);
+	free(string);
 }
-int sub(char ** args){
-	return 0;
+void sub(char ** args){
+	int subNum;
+	int getSubNum;
+	char * subString = malloc(sizeof(char) * 100);
+
+	for (int i = 1; args[i]!=NULL; i++){
+		subString = args[i];
+		getSubNum = strtol(subString, NULL, 0);
+		subNum = getSubNum - subNum;
+		subNum--;
+
+	}
+
+	printf("The answer is %d\n",subNum);
+	free(subString);
 }
 void arg(char ** args){
-	//
+	int argsCount = 0;
+	int j = 0;
+	for(j = 0; args[j] != NULL; j++) {
+		printf("Argument %d: %s\n", j, args[j]);
+		argsCount = argsCount + 1;
+	}
 }
 //------Utility functions---------------
+char ** getArgs(char ** args, char * inputFile, char * outputFile){
+	int j = 0;
+	char ** returnArgs = malloc(sizeof(char*)*100);
+	for (int i = 1; args[i] != NULL; i++){
+		if(strcmp(">",args[i])==0){
+			strcpy(outputFile,args[i+1]);
+			i = i + 1;
+		}else if (strcmp("<",args[i])==0) {
+			strcpy(inputFile,args[i + 1]);
+			i = i + 1;
+		}else{
+			returnArgs[j] = args[i];
+			j++;
+		}
+	}
+	return returnArgs;
+}
 void strLower(char ** args){
 	for(int i = 0; args[i] != NULL; i++) {
 		char * string = args[i];
